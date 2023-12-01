@@ -8,18 +8,17 @@ const PORT = process.env.PORT || 4002
 const rabbitmqUrl = "amqp://localhost:5672"
 const queueName = "test-queue"
 
-// var channel, connection
+var channel, connection // global variables
 
 async function connectQueue() {
   try {
-    let connection = await connect(rabbitmqUrl)
-    let channel = await connection.createChannel()
+    connection = await connect(rabbitmqUrl)
+    channel = await connection.createChannel()
 
     // connect to 'test-queue', create one if doesn't exist already
     await channel.assertQueue(queueName)
 
     channel.consume(queueName, (data) => {
-      // console.log(data)
       console.log("Data received : ", `${Buffer.from(data.content)}`)
       channel.ack(data)
     })

@@ -1,25 +1,28 @@
 import express, { json } from "express"
-import amqp from "amqplib"
+import { connect } from "amqplib"
 
 const app = express()
 const PORT = process.env.PORT || 4001
 
 app.use(json())
 
-var channel, connection //global variables
+var channel, connection
+
+connectQueue() // call connectQueue function
 
 async function connectQueue() {
   try {
-    connection = await amqp.connect("amqp://localhost:5672")
+    connection = await connect("amqp://localhost:5672")
     channel = await connection.createChannel()
 
+    // connect to 'test-queue', create one if doesnot exist already
     await channel.assertQueue("test-queue")
   } catch (error) {
     console.log(error)
   }
 }
 
-async function sendData(data) {
+const sendData = async (data) => {
   // send data to queue
   await channel.sendToQueue("test-queue", Buffer.from(JSON.stringify(data)))
 
@@ -28,18 +31,18 @@ async function sendData(data) {
   await connection.close()
 }
 
-connectQueue()
-
 app.get("/send-msg", (req, res) => {
-  // res.send("Hello world")
-  // data to be sent
   const data = {
     title: "Six of Crows",
     author: "Leigh Burdugo",
   }
-  sendData(data) // pass the data to the function we defined
+
+  // console.log(data)
+
+  sendData(data)
+
   console.log("A message is sent to queue")
-  res.send("Message Sent") //response to the API request
+  res.send("Message Sent")
 })
 
 app.listen(PORT, () => console.log("Server running at port " + PORT))
