@@ -2,9 +2,11 @@ import express, { json } from "express"
 import { connect } from "amqplib"
 
 const app = express()
-const PORT = process.env.PORT || 4001
-
 app.use(json())
+
+const PORT = process.env.PORT || 4001
+const rabbitmqBrokerUrl = "amqp://localhost:5672"
+const queueName = "test-queue"
 
 var channel, connection
 
@@ -12,11 +14,11 @@ connectQueue() // call connectQueue function
 
 async function connectQueue() {
   try {
-    connection = await connect("amqp://localhost:5672")
+    connection = await connect(rabbitmqBrokerUrl)
     channel = await connection.createChannel()
 
     // connect to 'test-queue', create one if doesnot exist already
-    await channel.assertQueue("test-queue")
+    await channel.assertQueue(queueName)
   } catch (error) {
     console.log(error)
   }
@@ -24,7 +26,7 @@ async function connectQueue() {
 
 const sendData = async (data) => {
   // send data to queue
-  await channel.sendToQueue("test-queue", Buffer.from(JSON.stringify(data)))
+  await channel.sendToQueue(queueName, Buffer.from(JSON.stringify(data)))
 
   // close the channel and connection
   await channel.close()

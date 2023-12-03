@@ -5,14 +5,14 @@ const app = express()
 app.use(json())
 
 const PORT = process.env.PORT || 4002
-const rabbitmqUrl = "amqp://localhost:5672"
+const rabbitmqBrokerUrl = "amqp://localhost:5672"
 const queueName = "test-queue"
 
 var channel, connection // global variables
 
 async function connectQueue() {
   try {
-    connection = await connect(rabbitmqUrl)
+    connection = await connect(rabbitmqBrokerUrl)
     channel = await connection.createChannel()
 
     // connect to 'test-queue', create one if doesn't exist already
