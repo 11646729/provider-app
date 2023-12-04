@@ -4,9 +4,9 @@ import { connect } from "amqplib"
 const app = express()
 app.use(json())
 
-const PORT = process.env.PORT || 4002
 const rabbitmqBrokerUrl = "amqp://localhost:5672"
 const queueName = "test-queue"
+const PORT = process.env.PORT || 4002
 
 var channel, connection // global variables
 
